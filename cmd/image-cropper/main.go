@@ -13,7 +13,7 @@ import (
 
 var (
 	dir            = "C:/Temp/pics/jisoo"
-	classifierFile = "face.xml"
+	classifierFile = "haarcascade_frontalface_default.xml"
 )
 
 func main() {
