@@ -3,44 +3,39 @@ package main
 import (
 	"net"
 	"fmt"
-	"io"
-	"log"
+	"encoding/gob"
 )
 
 type Message struct {
 	Text string
+	Seq int
 }
 
 func handleConnection(conn net.Conn) {
-	//recvBuf := make([]byte, 4096) // receive buffer: 4kB
+	fmt.Print("New commer!")
 	for {
-		n, err := conn.Read(recvBuf)
-		if nil != err {
-			if io.EOF == err {
-				log.Printf("connection is closed from client; %v", conn.RemoteAddr().String())
-				return
-			}
-			log.Printf("fail to receive data; err: %v", err)
-			return
-		}
-		if 0 < n {
-			data := recvBuf[:n]
-			log.Println(string(data))
+		decoder := gob.NewDecoder(conn)
+		msg := &Message{}
+		if err := decoder.Decode(msg); err != nil {
+			continue
+		} else {
+			fmt.Printf("msg: %s, seq: %d\n", msg.Text, msg.Seq);
 		}
 	}
 }
 
 func main() {
-	fmt.Println("Server")
-	ln, err := net.Listen("tcp", ":8080")
+	ln, err := net.Listen("tcp", "127.0.0.1:8000")
 	if err != nil {
 		panic(err)
 	}
 	for {
+		fmt.Println("Server is ready...")
 		conn, err := ln.Accept()
 		if err != nil {
 			continue
 		}
+
 		go handleConnection(conn)
 	}
 }
